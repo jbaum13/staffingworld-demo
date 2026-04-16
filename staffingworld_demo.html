@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StaffingWorld — Product Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#040300;font-family:'Georgia',serif;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+#APP{width:900px;max-width:100%;background:#000;border-radius:16px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);}
+#STAGE{width:100%;height:540px;position:relative;overflow:hidden;background:#040300;}
+#BG{position:absolute;inset:0;z-index:1;}
+#SCENE{position:absolute;inset:0;z-index:10;}
+#FLASH{position:absolute;inset:0;z-index:30;opacity:0;pointer-events:none;}
+
+/* BROWSER MOCK */
+.browser{width:100%;height:100%;display:flex;flex-direction:column;background:#f5f5f7;}
+.bbar{background:#e8e8ec;padding:7px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;border-bottom:1px solid #d0d0d8;}
+.bdots{display:flex;gap:5px;}
+.bdot{width:10px;height:10px;border-radius:50%;}
+.burl{flex:1;background:#fff;border-radius:4px;padding:3px 10px;font-size:10px;color:#666;font-family:system-ui;border:1px solid #d0d0d8;}
+.bbody{flex:1;overflow-y:auto;position:relative;}
+
+/* NAV */
+.snav{background:#fff;border-bottom:1px solid #e8e8ec;padding:9px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.slogo{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;color:#1a1a2e;font-family:system-ui;}
+.slogo-ic{width:20px;height:20px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;}
+.slinks{display:flex;gap:14px;}
+.slink{font-size:11px;color:#555;font-family:system-ui;cursor:pointer;}
+.slink.on{color:#1a1a2e;font-weight:700;}
+.ssearch{flex:1;background:#f5f5f7;border:1px solid #e0e0e8;border-radius:16px;padding:4px 12px;font-size:10px;color:#888;font-family:system-ui;margin-left:8px;}
+
+/* HERO */
+.hero{padding:28px 24px 16px;text-align:center;background:linear-gradient(180deg,#eef2ff 0%,#fff 60%);}
+.hbadge{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#5c6bc0;background:rgba(92,107,192,.1);padding:3px 12px;border-radius:12px;display:inline-block;margin-bottom:10px;font-family:system-ui;}
+.hh{font-size:20px;font-weight:800;color:#0a0a1a;line-height:1.25;font-family:system-ui;margin-bottom:6px;}
+.hsub{font-size:10px;color:#666;max-width:380px;margin:0 auto 14px;line-height:1.65;font-family:system-ui;}
+.hbtns{display:flex;gap:10px;justify-content:center;margin-bottom:16px;}
+.bprim{padding:7px 16px;background:#1a1a2e;color:#fff;border-radius:6px;font-size:10px;font-weight:700;font-family:system-ui;}
+.bout{padding:7px 16px;border:1.5px solid #1a1a2e;color:#1a1a2e;border-radius:6px;font-size:10px;font-weight:700;font-family:system-ui;}
+.hstats{display:flex;justify-content:center;}
+.hstat{padding:0 16px;text-align:center;border-right:1px solid #e0e0e8;}
+.hstat:last-child{border-right:none;}
+.hstat-n{font-size:15px;font-weight:800;color:#1a1a2e;font-family:system-ui;}
+.hstat-l{font-size:8px;color:#888;font-family:system-ui;margin-top:1px;}
+
+/* FEATURES */
+.feats{display:flex;gap:8px;padding:12px 16px;}
+.fc{flex:1;background:#fff;border:1px solid #e8e8ec;border-radius:10px;padding:12px;text-align:center;}
+.fc-ic{width:30px;height:30px;border-radius:8px;background:#eef2ff;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.fc-t{font-size:10px;font-weight:700;color:#0a0a1a;font-family:system-ui;margin-bottom:3px;}
+.fc-s{font-size:8.5px;color:#888;line-height:1.5;font-family:system-ui;}
+
+/* MARKETPLACE */
+.mh{padding:12px 20px 8px;font-family:system-ui;}
+.mh-t{font-size:15px;font-weight:800;color:#0a0a1a;margin-bottom:2px;}
+.mh-s{font-size:9px;color:#888;}
+.mfilters{display:flex;gap:7px;padding:7px 20px;align-items:center;}
+.mtab{padding:3px 11px;border-radius:14px;font-size:9px;font-family:system-ui;border:1px solid #e0e0e8;color:#555;}
+.mtab.on{background:#1a1a2e;color:#fff;border-color:#1a1a2e;}
+.msort{margin-left:auto;font-size:9px;color:#888;font-family:system-ui;}
+.deals{padding:0 16px;display:flex;flex-direction:column;gap:7px;}
+.dc{background:#fff;border:1px solid #e8e8ec;border-radius:10px;padding:11px 13px;}
+.dc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;}
+.dc-co{font-size:11px;font-weight:700;color:#0a0a1a;font-family:system-ui;}
+.dc-v{font-size:7.5px;padding:2px 6px;background:#e8f5e9;color:#2e7d32;border-radius:8px;font-weight:600;font-family:system-ui;margin-left:5px;}
+.dc-loc{display:flex;gap:5px;margin-bottom:5px;align-items:center;}
+.dc-lt{font-size:8.5px;color:#888;font-family:system-ui;}
+.dc-sec{font-size:8.5px;padding:1px 6px;border-radius:8px;font-weight:600;font-family:system-ui;}
+.dc-desc{font-size:8.5px;color:#666;line-height:1.5;font-family:system-ui;margin-bottom:7px;}
+.dc-met{display:flex;gap:12px;margin-bottom:7px;}
+.dm-n{font-size:10.5px;font-weight:700;color:#0a0a1a;font-family:system-ui;}
+.dm-l{font-size:7.5px;color:#aaa;font-family:system-ui;}
+.dm-g{color:#2e7d32;}
+.dc-foot{display:flex;align-items:center;justify-content:space-between;}
+.dc-views{font-size:8.5px;color:#aaa;font-family:system-ui;}
+.dc-score{display:flex;align-items:center;gap:4px;}
+.sc-badge{width:24px;height:24px;border-radius:50%;background:#1a1a2e;color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:system-ui;}
+.sc-lbl{font-size:7.5px;color:#888;font-family:system-ui;}
+.dc-acts{display:flex;gap:5px;}
+.bsave{padding:3px 8px;border:1px solid #e0e0e8;border-radius:4px;font-size:8.5px;color:#555;font-family:system-ui;}
+.bview{padding:3px 8px;background:#1a1a2e;color:#fff;border-radius:4px;font-size:8.5px;font-weight:600;font-family:system-ui;}
+.dc-pw{text-align:right;}
+.dc-p{font-size:14px;font-weight:800;color:#0a0a1a;font-family:system-ui;}
+.dc-pl{font-size:7.5px;color:#aaa;font-family:system-ui;}
+
+/* AI PANEL */
+.aih{padding:12px 20px 7px;font-family:system-ui;}
+.aih-t{font-size:14px;font-weight:800;color:#0a0a1a;margin-bottom:2px;}
+.aih-s{font-size:8.5px;color:#888;}
+.aitabs{display:flex;gap:1px;padding:0 16px 8px;border-bottom:1px solid #e8e8ec;margin-bottom:8px;}
+.aitab{padding:4px 11px;font-size:8.5px;font-family:system-ui;color:#888;border-bottom:2px solid transparent;}
+.aitab.on{color:#1a1a2e;font-weight:700;border-bottom-color:#1a1a2e;}
+.aicards{padding:0 16px;display:flex;flex-direction:column;gap:6px;}
+.aicard{background:#fff;border:1px solid #e8e8ec;border-radius:8px;padding:10px 11px;display:flex;align-items:center;gap:9px;}
+.aic-ic{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.aic-body{flex:1;}
+.aic-header{display:flex;align-items:center;gap:3px;margin-bottom:3px;}
+.aic-type{font-size:8.5px;font-weight:700;font-family:system-ui;}
+.aic-conf{font-size:8.5px;color:#888;font-family:system-ui;}
+.aic-desc{font-size:8.5px;color:#444;font-family:system-ui;margin-bottom:4px;}
+.aic-bar{height:3px;background:#e8e8ec;border-radius:2px;}
+.aic-fill{height:100%;border-radius:2px;}
+.aic-cta{font-size:8.5px;font-weight:700;color:#1a1a2e;font-family:system-ui;white-space:nowrap;}
+
+/* SUCCESS */
+.suc-h{padding:12px 20px 7px;text-align:center;font-family:system-ui;}
+.suc-badge{font-size:8.5px;padding:3px 10px;background:#fff8e1;color:#f57c00;border-radius:10px;font-weight:600;font-family:system-ui;display:inline-block;margin-bottom:7px;}
+.suc-t{font-size:14px;font-weight:800;color:#0a0a1a;margin-bottom:2px;}
+.suc-s{font-size:9px;color:#888;max-width:320px;margin:0 auto 10px;line-height:1.5;}
+.suc-stats{display:flex;justify-content:center;}
+.ss-s{padding:7px 13px;text-align:center;border-right:1px solid #e8e8ec;}
+.ss-s:last-child{border-right:none;}
+.ss-n{font-size:15px;font-weight:800;color:#1a1a2e;font-family:system-ui;}
+.ss-l{font-size:7.5px;color:#888;font-family:system-ui;margin-top:1px;}
+.ccase{margin:10px 16px 0;background:#fff;border:1px solid #e8e8ec;border-radius:10px;padding:11px 13px;}
+.ccase-co{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.ccase-ico{width:26px;height:26px;background:#e3f2fd;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#1565c0;font-family:system-ui;}
+.ccase-n{font-size:11px;font-weight:700;color:#0a0a1a;font-family:system-ui;}
+.ccase-sec{font-size:8.5px;color:#888;font-family:system-ui;}
+.ccase-deal{font-size:18px;font-weight:800;color:#2e7d32;font-family:system-ui;margin-bottom:2px;}
+.ccase-acq{font-size:8.5px;color:#888;font-family:system-ui;margin-bottom:7px;}
+.ccase-q{font-size:8.5px;font-style:italic;color:#555;line-height:1.65;font-family:system-ui;padding:7px;background:#f9f9fb;border-radius:6px;margin-bottom:5px;}
+.ccase-auth{font-size:8.5px;color:#888;font-family:system-ui;}
+.ccase-mets{display:flex;gap:9px;margin-top:7px;}
+.ccm-n{font-size:10px;font-weight:700;color:#0a0a1a;font-family:system-ui;}
+.ccm-l{font-size:7.5px;color:#aaa;font-family:system-ui;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes bgrow{from{width:0}to{width:var(--w,80%)}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+.au{animation:fadeUp .7s cubic-bezier(.16,1,.3,1) both;}
+.ai{animation:fadeIn .7s ease both;}
+.al{animation:slideLeft .6s cubic-bezier(.16,1,.3,1) both;}
+.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.35s}
+.d4{animation-delay:.5s}.d5{animation-delay:.65s}.d6{animation-delay:.8s}
+
+/* CONTROLS */
+#CTR{background:#050401;padding:12px 20px;display:flex;align-items:center;gap:14px;border-top:1px solid rgba(200,169,110,.1);}
+#PB{width:46px;height:46px;border-radius:50%;background:transparent;border:1px solid rgba(200,169,110,.45);cursor:pointer;font-size:16px;color:#c8a96e;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+#PB:hover{background:rgba(200,169,110,.1);box-shadow:0 0 14px rgba(200,169,110,.15);}
+#SN{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,169,110,.3);min-width:110px;font-family:Georgia,serif;}
+#PROG{flex:1;height:1px;background:rgba(255,255,255,.05);}
+#PF{height:100%;background:linear-gradient(90deg,#7a6030,#c8a96e);width:0%;}
+#TM{font-size:11px;color:rgba(255,255,255,.18);min-width:36px;text-align:right;}
+#SB{background:#050401;padding:4px 20px 10px;font-size:10px;color:rgba(200,169,110,.2);text-align:center;letter-spacing:.08em;}
+</style>
+</head>
+<body>
+
+<div id="APP">
+<div id="STAGE">
+  <canvas id="BG"></canvas>
+  <div id="SCENE"></div>
+  <div id="FLASH" style="background:#c8a96e;"></div>
+</div>
+<div id="CTR">
+  <button id="PB">&#9654;</button>
+  <div id="SN">ready</div>
+  <div id="PROG"><div id="PF"></div></div>
+  <div id="TM">0:00</div>
+</div>
+<div id="SB">ElevenLabs · James · StaffingWorld Product Demo · A SmartSiteIQ Production</div>
+</div>
+
+<script src="https://js.puter.com/v2/"></script>
+<script>
+(function(){
+'use strict';
+
+var cv=document.getElementById('BG');
+var ctx=cv.getContext('2d');
+var W=900,H=540,pts=[],rings=[];
+
+function resize(){
+  var s=document.getElementById('STAGE');
+  W=s.offsetWidth;H=s.offsetHeight;
+  cv.width=W;cv.height=H;
+  pts=[];
+  for(var i=0;i<160;i++){
+    pts.push({x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.14,
+      r:Math.random()*.9+.2,a:Math.random()*.22+.04,
+      f:Math.random()*2+.5,g:Math.random()>.65});
+  }
+}
+
+function spawnRing(x,y){rings.push({x:x,y:y,r:0,born:Date.now()});}
+
+function drawBg(t){
+  ctx.fillStyle='#040300';ctx.fillRect(0,0,W,H);
+  var v=ctx.createRadialGradient(W/2,H/2,60,W/2,H/2,W*.8);
+  v.addColorStop(0,'rgba(200,169,110,.03)');v.addColorStop(1,'rgba(0,0,0,.6)');
+  ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+  pts.forEach(function(p){
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    var a=p.a*(0.4+0.6*Math.sin(t*p.f));
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);
+    ctx.fillStyle=p.g?'rgba(200,169,110,'+a+')':'rgba(255,255,255,'+(a*.3)+')';
+    ctx.fill();
+  });
+  rings=rings.filter(function(rg){
+    var age=(Date.now()-rg.born)/1000;
+    rg.r+=1.3;
+    var a=Math.max(0,.4-age*.34);
+    if(a<=0)return false;
+    ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r,0,6.28);
+    ctx.strokeStyle='rgba(200,169,110,'+a+')';ctx.lineWidth=.6;ctx.stroke();
+    return true;
+  });
+}
+
+function nav(active){
+  return '<div class="snav"><div class="slogo"><div class="slogo-ic">S</div>StaffingWorld</div>'
+    +'<div class="slinks">'
+    +['Marketplace','Network','Industry Intel','Tools'].map(function(l){
+      return '<div class="slink'+(l===active?' on':'')+'" >'+l+'</div>';
+    }).join('')
+    +'</div><div class="ssearch">Search deals, companies...</div></div>';
+}
+
+function browser(inner,url){
+  return '<div class="browser"><div class="bbar"><div class="bdots">'
+    +'<div class="bdot" style="background:#ff5f57"></div>'
+    +'<div class="bdot" style="background:#febc2e"></div>'
+    +'<div class="bdot" style="background:#28c840"></div>'
+    +'</div><div class="burl">'+(url||'staffingworld.ai')+'</div></div>'
+    +'<div class="bbody">'+inner+'</div></div>';
+}
+
+var SCENES=[
+{dur:14,name:'StaffingWorld',dark:true,
+rings:[[.5,.42],[.28,.62],[.72,.32]],
+nar:["Staffing World.","The future of staffing industry M and A.","One platform.","Where buyers find sellers.","And deals actually close."],
+html:function(){
+  return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem;text-align:center;">'
+    +'<div style="font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:rgba(200,169,110,.4);font-family:Georgia,serif;margin-bottom:16px;" class="ai">A SmartSiteIQ Production</div>'
+    +'<div style="font-size:58px;font-weight:400;color:#fff;letter-spacing:-.02em;font-family:Georgia,serif;line-height:.95;" class="au d1">Staffing<span style="color:#c8a96e;">World</span></div>'
+    +'<div style="width:0;height:1px;background:linear-gradient(90deg,transparent,#c8a96e,transparent);margin:18px auto;animation:bgrow 1.4s ease .5s both;--w:260px;"></div>'
+    +'<div style="font-size:14px;font-weight:300;color:rgba(255,255,255,.35);letter-spacing:.04em;font-family:Georgia,serif;" class="au d3">The Future of Staffing Industry M&amp;A</div>'
+    +'<div style="display:flex;gap:30px;margin-top:26px;" class="au d4">'
+    +[['$1.2B+','Deals Facilitated'],['850+','Successful Transactions'],['500+','Active Users'],['95%','Customer Satisfaction']].map(function(s,i){
+      return (i>0?'<div style="width:1px;background:rgba(200,169,110,.18);"></div>':'')+
+        '<div style="text-align:center;"><div style="font-size:22px;font-weight:400;color:#c8a96e;font-family:Georgia,serif;">'+s[0]+'</div>'
+        +'<div style="font-size:8px;color:rgba(255,255,255,.28);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;font-family:Georgia,serif;">'+s[1]+'</div></div>';
+    }).join('')
+    +'</div></div>';
+}},
+
+{dur:18,name:'the platform',dark:false,
+nar:["This is StaffingWorld.","AI-powered deal matching.","Bank-grade secure due diligence.","An expert network built exclusively for staffing.","Over one point two billion in deals facilitated.","Eight hundred and fifty successful transactions.","Ninety-five percent customer satisfaction."],
+html:function(){
+  return '<div style="position:absolute;inset:8px;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);">'+
+    browser(nav('Marketplace')
+    +'<div style="overflow-y:auto;height:calc(100% - 38px);">'
+    +'<div class="hero ai">'
+    +'<div class="hbadge">AI-Powered M&amp;A Platform</div>'
+    +'<div class="hh au d1">The Future of Staffing<br>Industry M&amp;A</div>'
+    +'<div class="hsub ai d2">StaffingWorld connects buyers and sellers in the staffing industry with AI-powered deal matching, comprehensive due diligence tools, and a professional network of industry experts.</div>'
+    +'<div class="hbtns au d2"><div class="bprim">List Your Company</div><div class="bout">Find a Company</div></div>'
+    +'<div class="hstats au d3">'
+    +[['$1.2B+','Deals Facilitated'],['850+','Successful Trans.'],['500+','Active Users'],['95%','Satisfaction']].map(function(s){
+      return '<div class="hstat"><div class="hstat-n">'+s[0]+'</div><div class="hstat-l">'+s[1]+'</div></div>';
+    }).join('')+'</div></div>'
+    +'<div class="feats">'
+    +[['🤖','AI Deal Matching','50+ data points match buyers and sellers on strategic fit, valuation alignment, and deal preferences.'],
+      ['🔒','Secure Due Diligence','Bank-grade encrypted data rooms, NDA management, and controlled access to sensitive financials.'],
+      ['🤝','Expert Network','Industry advisors, investment bankers, and legal experts specializing in staffing M&A.']].map(function(f,i){
+      return '<div class="fc au d'+(i+3)+'"><div class="fc-ic">'+f[0]+'</div><div class="fc-t">'+f[1]+'</div><div class="fc-s">'+f[2]+'</div></div>';
+    }).join('')+'</div>'
+    +'<div style="text-align:center;padding:10px;font-size:8.5px;color:#888;font-family:system-ui;" class="ai d5">✓ Trusted by Industry Leaders &nbsp;·&nbsp; Join 2,500+ staffing professionals &nbsp;·&nbsp; <a style="color:#1a1a2e;font-weight:700;">View Success Stories →</a></div>'
+    +'</div>','staffingworld.ai')
+    +'</div>';
+}},
+
+{dur:19,name:'Deal Marketplace',dark:false,
+nar:["The Deal Marketplace.","Every vetted staffing company ready for acquisition.","Premier Healthcare Staffing Agency.","Twelve point five million in revenue.","AI match score... ninety-four.","Tech Talent Solutions.","Score... eighty-nine.","Industrial Workforce Partners.","Twelve eight million asking.","Score... eighty-seven.","The right match... every time."],
+html:function(){
+  function dc(co,loc,sec,scolor,desc,rev,emp,gr,price,score,views,intr,delay){
+    return '<div class="dc au '+delay+'">'
+      +'<div class="dc-top"><div>'
+      +'<span class="dc-co">'+co+'</span><span class="dc-v">Verified</span>'
+      +'<div class="dc-loc"><span class="dc-lt">📍 '+loc+'</span>'
+      +'<span class="dc-sec" style="background:'+scolor+'1a;color:'+scolor+';">'+sec+'</span></div>'
+      +'</div><div class="dc-pw"><div class="dc-p">'+price+'</div><div class="dc-pl">Asking Price</div></div></div>'
+      +'<div class="dc-desc">'+desc+'</div>'
+      +'<div class="dc-met">'
+      +'<div><div class="dm-n">'+rev+'</div><div class="dm-l">Annual Revenue</div></div>'
+      +'<div><div class="dm-n">'+emp+'</div><div class="dm-l">Employees</div></div>'
+      +'<div><div class="dm-n dm-g">'+gr+'</div><div class="dm-l">YoY Growth</div></div>'
+      +'</div>'
+      +'<div class="dc-foot">'
+      +'<div class="dc-views">👁 '+views+' &nbsp;♡ '+intr+' interested</div>'
+      +'<div class="dc-score"><div class="sc-badge">'+score+'</div><div class="sc-lbl">AI Match<br>Score</div></div>'
+      +'<div class="dc-acts"><div class="bsave">Save Deal</div><div class="bview">View Details</div></div>'
+      +'</div></div>';
+  }
+  return '<div style="position:absolute;inset:8px;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);">'+
+    browser(nav('Marketplace')
+    +'<div style="overflow-y:auto;height:calc(100% - 38px);">'
+    +'<div class="mh ai"><div class="mh-t">Deal Marketplace</div><div class="mh-s">Discover vetted staffing companies ready for acquisition. AI-powered matching ensures perfect fit.</div></div>'
+    +'<div class="mfilters ai d2"><div class="mtab on">All Deals</div><div class="mtab">Healthcare</div><div class="mtab">Technology</div><div class="mtab">Industrial</div><div class="msort">Newest ▾</div></div>'
+    +'<div class="deals">'
+    +dc('Premier Healthcare Staffing Agency','Dallas, TX','Healthcare','#2e7d32','Leading healthcare staffing company with 15+ years of operation','$12.5M','85','+23%','$8.2M','94','342','12','d3')
+    +dc('Tech Talent Solutions','Austin, TX','Technology','#1565c0','Specialized IT staffing firm focused on software developers and cybersecurity professionals','$9.8M','62','+18%','$6.1M','89','289','8','d4')
+    +dc('Industrial Workforce Partners','Houston, TX','Industrial','#e65100','Full-service industrial staffing covering manufacturing, logistics, and construction','$18.2M','134','+15%','$12.8M','87','456','15','d5')
+    +'</div></div>','staffingworld.ai/marketplace')
+    +'</div>';
+}},
+
+{dur:17,name:'AI Intelligence',dark:false,
+nar:["AI-Powered Deal Intelligence.","The platform doesn't wait for you to act.","Deal match... ninety-six percent confidence.","Perfect match found for your healthcare listing.","Price optimization... eighty-four percent.","Reduce asking price by eight percent for faster sale.","Buyer lead... ninety-one percent confidence.","New qualified buyer in your target market.","This is intelligence working for you."],
+html:function(){
+  function aic(type,tc,conf,desc,bw,bc,cta,delay){
+    return '<div class="aicard al '+delay+'">'
+      +'<div class="aic-ic" style="background:'+tc+'15;">🤖</div>'
+      +'<div class="aic-body">'
+      +'<div class="aic-header"><span class="aic-type" style="color:'+tc+';">'+type+'</span><span class="aic-conf">'+conf+' confidence</span></div>'
+      +'<div class="aic-desc">'+desc+'</div>'
+      +'<div class="aic-bar"><div class="aic-fill" style="width:'+bw+';background:'+bc+';animation:bgrow .8s ease .3s both;--w:'+bw+';"></div></div>'
+      +'</div>'
+      +'<div class="aic-cta">'+cta+' →</div>'
+      +'</div>';
+  }
+  return '<div style="position:absolute;inset:8px;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);">'+
+    browser(nav('Marketplace')
+    +'<div style="overflow-y:auto;height:calc(100% - 38px);">'
+    +'<div class="aih ai"><div class="aih-t">AI-Powered Deal Intelligence</div><div class="aih-s">Let our AI do the heavy lifting. Generate CIMs, qualify buyers, and discover perfect matches automatically.</div></div>'
+    +'<div class="aitabs ai d2"><div class="aitab on">AI Suggestions</div><div class="aitab">Buyer Scoring</div><div class="aitab">CIM Generator</div><div class="aitab">Deal Analytics</div></div>'
+    +'<div style="font-size:9px;color:#888;padding:0 16px 7px;display:flex;align-items:center;gap:4px;font-family:system-ui;" class="ai d2">🤖 Smart Recommendations for You</div>'
+    +'<div class="aicards">'
+    +aic('Deal Match','#2e7d32','96%','Perfect match found for your healthcare listing','96%','#2e7d32','View Match','d3')
+    +aic('Price Optimization','#f57c00','84%','Consider reducing asking price by 8% for faster sale','84%','#f57c00','See Analysis','d4')
+    +aic('Buyer Lead','#1565c0','91%','New qualified buyer in your target market','91%','#1565c0','Connect Now','d5')
+    +'</div></div>','staffingworld.ai/intelligence')
+    +'</div>';
+}},
+
+{dur:16,name:'success stories',dark:false,
+nar:["Two hundred and forty-seven million dollars.","Eighty-nine percent success rate.","Thirty-four days average to match.","MedStaff Solutions.","Twelve point five million dollars.","Acquired in fourteen days.","Three qualified buyers in the first week.","These are not projections.","These are receipts."],
+html:function(){
+  return '<div style="position:absolute;inset:8px;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);">'+
+    browser(nav('Marketplace')
+    +'<div style="overflow-y:auto;height:calc(100% - 38px);">'
+    +'<div class="suc-h">'
+    +'<div class="suc-badge ai">⭐ Success Stories</div>'
+    +'<div class="suc-t au d1">Deals That Changed Everything</div>'
+    +'<div class="suc-s ai d2">Real stories from staffing company owners who successfully sold their businesses through our platform.</div>'
+    +'<div class="suc-stats au d2">'
+    +[['$247M','Total Deal Value'],['89%','Success Rate'],['34 days','Avg Time to Match'],['4.9★','Customer Rating']].map(function(s){
+      return '<div class="ss-s"><div class="ss-n">'+s[0]+'</div><div class="ss-l">'+s[1]+'</div></div>';
+    }).join('')+'</div></div>'
+    +'<div class="ccase au d3">'
+    +'<div class="ccase-co"><div class="ccase-ico">MS</div><div><div class="ccase-n">MedStaff Solutions</div><div class="ccase-sec">Healthcare Staffing · Austin, TX · 47 days to close</div></div></div>'
+    +'<div class="ccase-deal">$12.5M</div>'
+    +'<div class="ccase-acq">Acquired by Healthcare Growth Partners</div>'
+    +'<div class="ccase-q">"StaffingWorld\'s AI matching connected us with the perfect buyer in just 2 weeks. The CIM generator saved us months of work, and their team guided us through every step. We couldn\'t be happier with the outcome."</div>'
+    +'<div class="ccase-auth">— Dr. Maria Rodriguez, Founder &amp; CEO &nbsp;★★★★★</div>'
+    +'<div class="ccase-mets">'
+    +[['14 days','Time to Match'],['127%','Above Buyer Interest'],['$12.5M','Final Price'],['3','Qualified Buyers Wk 1']].map(function(m){
+      return '<div><div class="ccm-n">'+m[0]+'</div><div class="ccm-l">'+m[1]+'</div></div>';
+    }).join('')+'</div></div></div>','staffingworld.ai/success')
+    +'</div>';
+}},
+
+{dur:16,name:'the close',dark:true,
+rings:[[.5,.4],[.22,.58],[.78,.32],[.5,.72]],
+nar:["The window is open.","No dominant player has claimed this space.","The technology works.","The deals are closing.","Staffing World.","Built on SmartSiteIQ.","This is where you want to be."],
+html:function(){
+  return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem;text-align:center;">'
+    +'<div style="font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:rgba(200,169,110,.38);font-family:Georgia,serif;margin-bottom:18px;" class="ai">The Future of Staffing M&amp;A</div>'
+    +'<div style="font-size:58px;font-weight:400;color:#fff;letter-spacing:-.02em;font-family:Georgia,serif;line-height:.95;" class="au d1">Staffing<span style="color:#c8a96e;">World</span></div>'
+    +'<div style="width:0;height:1px;background:linear-gradient(90deg,transparent,#c8a96e,transparent);margin:18px auto;animation:bgrow 1.4s ease .5s both;--w:230px;"></div>'
+    +'<div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.18);font-family:Georgia,serif;margin-bottom:24px;" class="ai d3">Where the Industry Moves</div>'
+    +'<div style="display:flex;gap:12px;justify-content:center;" class="au d4">'
+    +'<div style="padding:12px 26px;background:#c8a96e;color:#040200;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:Georgia,serif;cursor:pointer;">Request the Deck</div>'
+    +'<div style="padding:12px 26px;border:1px solid rgba(200,169,110,.4);color:rgba(200,169,110,.7);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-family:Georgia,serif;cursor:pointer;">View Platform</div>'
+    +'</div>'
+    +'<div style="font-size:9px;color:rgba(200,169,110,.18);margin-top:18px;letter-spacing:.14em;font-family:Georgia,serif;" class="ai d6">staffingworld.ai &nbsp;·&nbsp; Built on SmartSiteIQ &nbsp;·&nbsp; AI + Web3</div>'
+    +'</div>';
+}}
+];
+
+var TOTAL=SCENES.reduce(function(a,s){return a+s.dur;},0);
+var APP={cur:-1,playing:false,elapsed:0,t0:0,tout:null,timer:null,raf:null};
+
+function $i(id){return document.getElementById(id);}
+function T(fn,ms){return setTimeout(fn,ms||0);}
+
+function goScene(i){
+  if(i>=SCENES.length){finish();return;}
+  APP.cur=i;
+  var sc=SCENES[i];
+  $i('SN').textContent=sc.name;
+  var fl=$i('FLASH');
+  fl.style.opacity='.5';fl.style.transition='none';
+  T(function(){fl.style.transition='opacity .6s ease';fl.style.opacity='0';},55);
+  T(function(){
+    $i('SCENE').innerHTML=sc.html();
+    if(sc.rings){
+      sc.rings.forEach(function(r,idx){
+        T(function(){spawnRing(W*r[0],H*r[1]);},idx*200);
+      });
+    }
+  },80);
+  speakScene(sc,i);
+  APP.tout=T(function(){APP.elapsed+=sc.dur;goScene(i+1);},sc.dur*1000);
+}
+
+var VIDS=['ZQe5CZNOzWyzPSCn5a3c','TxGEqnHWrfWFTfGW9XjX','pNInz6obpgDQGcFmaJgB'];
+var vi=0;
+
+function speakScene(sc,idx){
+  var text=sc.nar.join(' ');
+  if(window.puter){
+    $i('SB').textContent='ElevenLabs · generating "'+sc.name+'"...';
+    puter.ai.txt2speech(text,{provider:'elevenlabs',voice:VIDS[vi%VIDS.length],output_format:'mp3_44100_128'})
+    .then(function(audio){
+      $i('SB').textContent='ElevenLabs · James · "'+sc.name+'" · '+(idx+1)+'/'+SCENES.length;
+      if(APP.cur===idx&&APP.playing){try{audio.volume=1;audio.play();}catch(e){}}
+    }).catch(function(){vi++;fallback(sc.nar);});
+  } else {
+    fallback(sc.nar);
+  }
+}
+
+function fallback(lines){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  var vs=window.speechSynthesis.getVoices();
+  var best=null;
+  for(var i=0;i<vs.length;i++){
+    var n=vs[i].name;
+    if(n.indexOf('Google UK English Male')>-1){best=vs[i];break;}
+    if(!best&&(n.indexOf('Daniel')>-1||n.indexOf('Arthur')>-1))best=vs[i];
+  }
+  var qi=0;
+  function next(){
+    if(qi>=lines.length*2)return;
+    var gap=qi%2===1;
+    var u=new SpeechSynthesisUtterance(gap?' ':lines[Math.floor(qi/2)]);
+    u.rate=gap?1:.8;u.pitch=.87;u.volume=gap?0:1;
+    if(best)u.voice=best;
+    u.onend=function(){T(next,gap?340:0);};
+    window.speechSynthesis.speak(u);qi++;
+  }
+  next();
+}
+
+function renderLoop(){
+  if(!APP.playing)return;
+  drawBg(Date.now()/1000);
+  APP.raf=requestAnimationFrame(renderLoop);
+}
+
+function startTimer(){
+  APP.timer=setInterval(function(){
+    if(!APP.playing)return;
+    var now=Math.min(APP.elapsed+(Date.now()-APP.t0)/1000,TOTAL);
+    $i('PF').style.width=(now/TOTAL*100)+'%';
+    $i('TM').textContent=fmt(now);
+  },100);
+}
+
+function fmt(s){return Math.floor(s/60)+':'+('0'+Math.floor(s%60)).slice(-2);}
+
+function finish(){
+  APP.playing=false;
+  cancelAnimationFrame(APP.raf);clearTimeout(APP.tout);clearInterval(APP.timer);
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  $i('PB').innerHTML='&#9654;';$i('PF').style.width='100%';
+  $i('TM').textContent=fmt(TOTAL);$i('SN').textContent='fin';
+  $i('SB').textContent='Complete · click play to watch again · StaffingWorld · SmartSiteIQ';
+  APP.cur=-1;APP.elapsed=0;
+}
+
+$i('PB').addEventListener('click',function(){
+  if(!APP.playing){
+    APP.playing=true;$i('PB').innerHTML='&#9646;&#9646;';
+    APP.t0=Date.now();
+    if(APP.cur<0)APP.elapsed=0;
+    goScene(APP.cur<0?0:APP.cur);
+    APP.raf=requestAnimationFrame(renderLoop);
+    startTimer();
+  } else {
+    APP.playing=false;$i('PB').innerHTML='&#9654;';
+    cancelAnimationFrame(APP.raf);clearTimeout(APP.tout);clearInterval(APP.timer);
+    if(window.speechSynthesis)window.speechSynthesis.cancel();
+    APP.elapsed+=(Date.now()-APP.t0)/1000;
+    $i('SB').textContent='Paused · click to resume';
+  }
+});
+
+setTimeout(function(){
+  resize();drawBg(0);
+  $i('SCENE').innerHTML='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">'
+    +'<div style="font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(200,169,110,.38);font-family:Georgia,serif;">A SmartSiteIQ Production</div>'
+    +'<div style="font-size:52px;font-weight:400;color:#fff;letter-spacing:-.02em;font-family:Georgia,serif;">Staffing<span style="color:#c8a96e;">World</span></div>'
+    +'<div style="font-size:10px;color:rgba(200,169,110,.28);letter-spacing:.18em;text-transform:uppercase;font-family:Georgia,serif;">Press play · Turn the volume up</div>'
+    +'</div>';
+  $i('SB').textContent=window.puter?'ElevenLabs AI voice ready · Click play':'Click play · loading voice engine...';
+  if(window.speechSynthesis){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};
+  }
+},150);
+
+})();
+</script>
+</body>
+</html>
